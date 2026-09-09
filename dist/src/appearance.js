@@ -1,11 +1,12 @@
 import * as T from '../vendor/three.module.js';
 
-export const palette={wood:0xd9be91,stone:0x929b9e,green:0x77946d,glass:0x79b9e4,wall:0xe6e1d6};
+export const palette={wood:0xd9be91,stone:0x929b9e,green:0x77946d,glass:0x79b9e4,wall:0xe6e1d6,underground:0xd0d2cf};
 export function shapes(item){return(item.parts||[item]).filter(p=>p.polygon?.length>=3).map(p=>{const s=new T.Shape(p.polygon.map(([x,z])=>new T.Vector2(x,-z)));for(const h of p.holes||[])if(h.length>=3)s.holes.push(new T.Path(h.map(([x,z])=>new T.Vector2(x,-z))));return s;});}
 export function surface(item,height,mat,y=0){const ss=shapes(item);if(!ss.length)return null;const mesh=new T.Mesh(height?new T.ExtrudeGeometry(ss,{depth:height,bevelEnabled:false}):new T.ShapeGeometry(ss),mat);mesh.rotation.x=-Math.PI/2;mesh.position.y=y;return mesh;}
 export function contains(p,xy){const ring=ps=>{let b=false;for(let i=0,j=ps.length-1;i<ps.length;j=i++){const a=ps[i],c=ps[j];if((a[1]>xy[1])!==(c[1]>xy[1])&&xy[0]<(c[0]-a[0])*(xy[1]-a[1])/(c[1]-a[1])+a[0])b=!b;}return b;};return ring(p.polygon)&&!(p.holes||[]).some(ring);}
 export function material(kind,mask=null,options={}){
- const mat=new T.MeshStandardMaterial({color:palette[kind]??0xe2ded3,roughness:kind==='glass'?.25:.9,side:T.DoubleSide,...(kind==='glass'?{transparent:true,opacity:.48,depthWrite:false}:{}),...options});
+ const opacity=options.opacity??(kind==='glass'?.48:1),transparent=options.transparent??(kind==='glass'||opacity<1);
+ const mat=new T.MeshStandardMaterial({color:palette[kind]??0xe2ded3,roughness:kind==='glass'?.25:.9,side:T.DoubleSide,transparent,opacity,depthWrite:options.depthWrite??!transparent,...options});
  mat.userData.atlasMaterial=kind;mat.userData.districtTint=!!mask?.districtTexture;
  mat.onBeforeCompile=shader=>{
   shader.vertexShader='varying vec3 atlasWorld;\n'+shader.vertexShader;
@@ -26,10 +27,10 @@ export function material(kind,mask=null,options={}){
  };
  mat.customProgramCacheKey=()=>`atlas-v6-${kind}-${!!mask}-${!!mask?.districtTexture}`;return mat;
 }
-export function walls(pieces,height,kind,mat){if(!pieces.length)return null;const mesh=new T.InstancedMesh(new T.BoxGeometry(1,1,1),mat,pieces.length),dummy=new T.Object3D();pieces.forEach((p,i)=>{const[x,z,xx,zz]=p.segment;dummy.position.set((x+xx)/2,height/2,(z+zz)/2);dummy.rotation.set(0,-Math.atan2(zz-z,xx-x),0);dummy.scale.set(Math.hypot(xx-x,zz-z),height,kind==='wall'?.10:.045);dummy.updateMatrix();mesh.setMatrixAt(i,dummy.matrix);});return mesh;}
+export function walls(pieces,height,kind,mat){if(!pieces.length)return null;const mesh=new T.InstancedMesh(new T.BoxGeometry(1,1,1),mat,pieces.length),dummy=new T.Object3D();pieces.forEach((p,i)=>{const[x,z,xx,zz]=p.segment,h=Math.min(p.displayHeight??height,height);dummy.position.set((x+xx)/2,h/2,(z+zz)/2);dummy.rotation.set(0,-Math.atan2(zz-z,xx-x),0);dummy.scale.set(Math.hypot(xx-x,zz-z),h,kind==='wall'?.10:.045);dummy.updateMatrix();mesh.setMatrixAt(i,dummy.matrix);});return mesh;}
 
 // Reused by the browser and GLB export. Each prototype uses simple, source-sized solids.
-export function addFurniture(group,items,mask=null){
+export function addFurniture(group,items,mask=null,opacity=1){
  const batches=new Map();
  function box(item,color,cx,cy,cz,sx,sy,sz){const key=color;if(!batches.has(key))batches.set(key,[]);batches.get(key).push({item,position:[cx,cy,cz],scale:[sx,sy,sz]});}
  for(const it of items){const[w,h,d]=it.size;
@@ -41,5 +42,5 @@ export function addFurniture(group,items,mask=null){
   else{box(it,0xd8bd91,0,.72,0,w,.06,d);for(const x of [-1,1])for(const z of [-1,1])box(it,0x70777a,x*w*.42,.34,z*d*.38,.055,.68,.055);if(it.kind==='workstation'){box(it,0x8daeb3,0,.92,0,w,.38,.04);if(w>3)box(it,0x8daeb3,0,.92,0,.04,.38,d);}}
  }
  const dummy=new T.Object3D(),parent=new T.Object3D();
- for(const[color,boxes]of batches){const mesh=new T.InstancedMesh(new T.BoxGeometry(1,1,1),material('furniture',mask,{color}),boxes.length);for(let i=0;i<boxes.length;i++){const b=boxes[i],it=b.item;parent.position.set(it.position[0],it.localElevation||0,it.position[1]);parent.rotation.y=-it.rotation;parent.updateMatrix();dummy.position.set(...b.position);dummy.scale.set(...b.scale);dummy.rotation.set(0,0,0);dummy.updateMatrix();mesh.setMatrixAt(i,parent.matrix.clone().multiply(dummy.matrix));}mesh.name='原图家具简化模型';group.add(mesh);}
+ for(const[color,boxes]of batches){const mesh=new T.InstancedMesh(new T.BoxGeometry(1,1,1),material('furniture',mask,{color,opacity,transparent:opacity<1,depthWrite:opacity>=1}),boxes.length);for(let i=0;i<boxes.length;i++){const b=boxes[i],it=b.item;parent.position.set(it.position[0],it.localElevation||0,it.position[1]);parent.rotation.y=-it.rotation;parent.updateMatrix();dummy.position.set(...b.position);dummy.scale.set(...b.scale);dummy.rotation.set(0,0,0);dummy.updateMatrix();mesh.setMatrixAt(i,parent.matrix.clone().multiply(dummy.matrix));}mesh.name='原图家具简化模型';group.add(mesh);}
 }

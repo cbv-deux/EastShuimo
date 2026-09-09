@@ -1,6 +1,6 @@
 import * as T from '../vendor/three.module.js';
 export const stateKey='eastshuimo-map-view-v6';
-export const defaults=()=>({expanded:true,roofVisible:true,groundVisible:true,hiddenFloors:[],hiddenBuildings:[],hiddenDistricts:[],hiddenBlocks:[],interiors:{overview:false,building:true,floor:true},labels:true,legend:true});
+export const defaults=()=>({expanded:true,overviewFocus:'G',roofVisible:true,groundVisible:true,hiddenFloors:[],hiddenBuildings:[],hiddenDistricts:[],hiddenBlocks:[],interiors:{overview:false,building:true,floor:true},labels:true,legend:true});
 export function loadState(storage){try{const s=JSON.parse(storage.getItem(stateKey)||'null');return {...defaults(),...s,interiors:{...defaults().interiors,...s?.interiors}};}catch{return defaults();}}
 export function saveState(storage,s){try{storage.setItem(stateKey,JSON.stringify(s));return true;}catch{return false;}}
 export function isBuildingVisible(p,s,route){return !(p.buildingIds?.length)||p.buildingIds.some(id=>!s.hiddenBuildings.includes(id)&&(route.type!=='building'||id===Number(route.id)));}
