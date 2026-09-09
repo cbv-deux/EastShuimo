@@ -1,0 +1,13 @@
+<!doctype html><html lang="zh-CN"><head>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 32 32%27%3E%3Crect width=%2732%27 height=%2732%27 rx=%276%27 fill=%27%2397634e%27/%3E%3C/svg%3E"><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#10151c"><title>东水磨 · 立体地图</title><link rel="stylesheet" href="./src/style.css"></head><body>
+<main><div id="scene" aria-label="东水磨可交互三维地图"></div><div id="labels"></div>
+<header><a class="brand" href="#/overview"><span class="brand-icon">东</span><span>东水磨<small>空间地图</small></span></a><nav aria-label="地图视图"><a id="nav-overview" href="#/overview">总览</a><button id="building-menu" aria-expanded="true">楼栋</button><button id="floor-menu" aria-expanded="true">楼层</button></nav><span id="context"></span></header>
+<aside id="navigation"><div class="nav-title">楼栋 <span>11</span></div><div id="buildings"></div><div class="nav-title">楼层</div><div id="floor-links"></div></aside>
+<div id="slice-controls"><button id="expand-toggle" aria-pressed="true">缩合</button><span id="slice-title">显示至</span><div id="levels"></div><button id="whole-building">全楼</button></div>
+<div id="view-controls"><button id="interiors-toggle" aria-pressed="false">内饰</button><button id="visibility-toggle">显示范围</button></div>
+<aside id="visibility-panel" hidden><button id="close-visibility" aria-label="关闭显示范围">×</button><h2>显示范围</h2><button id="show-all">全部显示</button><div id="visibility-content"></div></aside>
+<aside id="detail" hidden><button id="close-detail" aria-label="关闭详情">×</button><div id="detail-body"></div></aside>
+<div id="tools"><button id="reset" aria-label="恢复全图">⤢</button><button id="labels-toggle" aria-pressed="true">标签</button><button id="legend-toggle" aria-pressed="true">图例</button><button id="top-view">俯视</button><button id="capture">保存图片</button></div>
+<div id="legend"><span><i class="lamp lift"></i>电梯</span><span><i class="lamp up"></i>向上</span><span><i class="lamp down"></i>向下</span><label id="district-control" hidden>分区层级 <select id="district-level"><option value="1">大分区</option><option value="2">子分区</option><option value="3">细分区</option></select></label><div id="district-list"></div></div>
+<footer><span id="hint">拖动旋转 · 右键 / 双指平移 · 滚轮缩放</span><span>展开净空为三倍层高 · 内饰为原图布局简化复原 · <span id="build-revision">读取版本…</span></span></footer><div id="notice" role="status">正在载入地图…</div>
+</main><script type="module" src="./src/main.js"></script></body></html>

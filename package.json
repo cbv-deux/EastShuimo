@@ -1,0 +1,16 @@
+{
+  "name": "eastshuimo-map",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "node scripts/build.mjs",
+    "dev": "node scripts/serve.mjs",
+    "validate": "node scripts/validate.mjs",
+    "import-data": "node scripts/import-data.mjs",
+    "preview": "node scripts/serve.mjs --dist"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
